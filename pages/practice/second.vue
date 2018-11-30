@@ -45,8 +45,8 @@ import config from '~/assets/routing/config.js'
 export default {
   data () {
     return {
-      data: []
-
+      data: [],
+      path: config.httpUrl
     }
   },
 
@@ -56,18 +56,18 @@ export default {
 
   methods: {
     getRequest () {
-      axios.get(config.httpUrl)
+      axios.get(this.path)
         .then(response => {
-          let data = response.data.list
-          for (let item of data) {
-            item.password = item.password.replace(/./g, '*')
+          let SuccessArray = response.data.list
+          for (let each of SuccessArray) {
+            each.password = each.password.replace(/./g, '*')
 
-            if (item.startDate || item.endDate) {
-              item.startDate = moment(item.startDate).format('YYYY-MM-DD')
-              item.endDate = moment(item.endDate).format('YYYY-MM-DD')
+            if (each.startDate || each.endDate) {
+              each.startDate = moment(each.startDate).format('YYYY-MM-DD')
+              each.endDate = moment(each.endDate).format('YYYY-MM-DD')
             }
           }
-          this.data = data
+          this.data = SuccessArray
         })
         .catch(error => {
           console.log(error)
