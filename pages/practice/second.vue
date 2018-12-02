@@ -3,7 +3,7 @@
     <div class="container-top">
       <span>
         My Second Demo 
-        <el-button type="info" @click="newMethods">添加数据</el-button>
+        <el-button type="info" @click="dialogFormVisible = true">添加数据</el-button>
       </span>
     </div>
 
@@ -47,6 +47,35 @@
         </el-table-column>
       </el-table>
     </div>
+
+    <el-dialog title="新增数据" :visible.sync="dialogFormVisible">
+      <el-form ref="nuwForm" :model="form">
+        <el-form-item label="port" :label-width="formLabelWidth">
+          <el-input v-model="form.port" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="password" :label-width="formLabelWidth">
+          <el-input v-model="form.password" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="comment" :label-width="formLabelWidth">
+          <el-input v-model="form.comment" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="startDate" :label-width="formLabelWidth">
+          <el-col :span="11">
+            <el-date-picker type="date" placeholder="选择日期" v-model="form.startDate" style="width: 100%;"></el-date-picker>
+          </el-col>
+        </el-form-item>
+        <el-form-item label="endDate" :label-width="formLabelWidth">
+          <el-col :span="11">
+            <el-date-picker type="date" placeholder="选择日期" v-model="form.endDate" style="width: 100%;"></el-date-picker>
+          </el-col>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="newMethods('form')">确 定</el-button>
+      </div>
+    </el-dialog>
+
   </div>
 </template>
 
@@ -59,7 +88,16 @@ export default {
   data () {
     return {
       data: [],
-      path: config.httpUrl
+      path: config.httpUrl,
+      dialogFormVisible: false,
+      form: {
+        port: '',
+        password: '',
+        comment: '',
+        startDate: '',
+        endDate: ''
+      },
+      formLabelWidth: '120px'
     }
   },
 
@@ -98,52 +136,24 @@ export default {
         }
       }
     },
-    newMethods () {
-      const h = this.$createElement
-      this.$msgbox({
-        title: '添加信息',
-        message: h('div', null, [
-          h('input', { style: 'width: 200px; height: 35px; margin-bottom: 15px' }),
-          h('i', { style: 'color: red' }, '请输入端口号'),
-          h('input', { style: 'width: 200px; height: 35px; margin-bottom: 15px' }, null),
-          h('i', { style: 'color: red' }, '请输入密码'),
-          h('input', { style: 'width: 200px; height: 35px; margin-bottom: 15px' }, null),
-          h('i', { style: 'color: red' }, '请输入开始时间'),
-          h('input', { style: 'width: 200px; height: 35px; margin-bottom: 15px' }, null),
-          h('i', { style: 'color: red' }, '请输入结束时间')
-        ]),
-        showCancelButton: true,
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        beforeClose: (action, instance, done) => {
-          if (action === 'confirm') {
-            instance.confirmButtonLoading = true
-            instance.confirmButtonText = '执行中...'
-            setTimeout(() => {
-              done()
-              setTimeout(() => {
-                instance.confirmButtonLoading = false
-              }, 300)
-            }, 3000)
-          } else {
-            done()
-          }
-        }
+    newMethods (form) {
+      this.dialogFormVisible = false
+      axios.post(this.path, {
+        port: this.form.port,
+        password: this.form.password,
+        startDate: this.form.startDate,
+        comment: this.form.comment,
+        endDate: this.form.endDate
       })
-        .then(action => {
-          this.$message({
-            type: 'info',
-            message: 'action: ' + action
-          })
+        .then(response => {
+          console.log(response)
+          this.getRequest()
+          this.$refs['nuwForm'].resetFields()
+        })
+        .catch(error => {
+          console.log(error)
         })
     }
-    // axios.post(this.path)
-    //   .then(response => {
-    //     console.log(response)
-    //   })
-    //   .catch(error => {
-    //     console.log(error)
-    //   })
   }
 }
 </script>
