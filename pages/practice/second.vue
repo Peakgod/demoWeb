@@ -38,18 +38,18 @@
         <el-table-column
         fixed="right"
         label="操作"
-         width="160">
-          <template slot-scope="scope">
-            <el-button type="text" class="ele-btn-view">查看</el-button>
-            <el-button type="text" class="ele-btn-modify">修改</el-button>
-            <el-button type="text" class="ele-btn-delete">删除</el-button>
+         width="200">
+          <template slot-scope="scope" class="ele-btn">
+            <el-button type="success">查看</el-button>
+            <el-button type="info" @click="editorData (scope.$index, scope.row) ">编辑</el-button>
+            <el-button type="danger" @click="deleteData (scope.$index, scope.row) ">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
     </div>
 
     <el-dialog title="新增数据" :visible.sync="dialogFormVisible">
-      <el-form ref="nuwForm" :model="form">
+      <el-form ref="andForm" :model="form">
         <el-form-item label="port" :label-width="formLabelWidth">
           <el-input v-model="form.port" autocomplete="off"></el-input>
         </el-form-item>
@@ -75,7 +75,6 @@
         <el-button type="primary" @click="newMethods('form')">确 定</el-button>
       </div>
     </el-dialog>
-
   </div>
 </template>
 
@@ -106,8 +105,8 @@ export default {
   },
 
   methods: {
+    // 查询
     getRequest () {
-      // console.log(this.path)
       axios.get(this.path)
         .then(response => {
           let SuccessArray = response.data.list
@@ -136,23 +135,45 @@ export default {
         }
       }
     },
+    // 添加数据
     newMethods (form) {
       this.dialogFormVisible = false
-      axios.post(this.path, {
-        port: this.form.port,
-        password: this.form.password,
-        startDate: this.form.startDate,
-        comment: this.form.comment,
-        endDate: this.form.endDate
-      })
+      axios.post(this.path, this.form)
         .then(response => {
-          console.log(response)
           this.getRequest()
-          this.$refs['nuwForm'].resetFields()
+          this.$refs.andForm.resetFields()
         })
         .catch(error => {
           console.log(error)
         })
+    },
+    // 编辑
+    editorData (index, row) {
+      let item = Object.assign({}, row)
+      console.log(item)
+      this.$confirm('div', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消'
+      })
+    },
+    // 删除
+    deleteData (index, row) {
+      let item = Object.assign({}, row)
+      this.$confirm('此操作将永久删除该数据, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.pageLoading = true
+        axios.delete(this.path, { data: { id: item._id } })
+          .then(res => {
+            console.log(res)
+            this.pageLoading = false
+          }).catch(e => {
+            console.log(e)
+            this.pageLoading = false
+          })
+      })
     }
   }
 }
@@ -188,6 +209,10 @@ export default {
     .ele-btn-delete{
       color: rgb(207, 45, 67);
     }
+}
+.el-button {
+    padding: 4px 5px;
+    margin: 0;
 }
 @media (max-width: 1000px) {
   .el-table {
